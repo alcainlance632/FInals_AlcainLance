@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Memory Match Game</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f8ff;
+    margin: 0;
+    padding: 0;
+}
+h1 {
+    margin-top: 20px;
+    color: #333;
+}
+#game-board {
+    width: 320px;
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: repeat(4, 70px);
+    grid-gap: 10px;
+}
+.card {
+    width: 70px;
+    height: 70px;
+    background-color: #87ceeb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    user-select: none;
+}
+.card.flipped {
+    background-color: #ff7f50;
+}
+#moves {
+    margin-top: 20px;
+    font-size: 18px;
+}
+button {
+    margin-top: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #ff7f50;
+    color: #fff;
+}
+button:hover {
+    background-color: #ff6347;
+}
+</style>
+</head>
+<body>
+
+<h1>Memory Match</h1>
+<div id="game-board"></div>
+<div id="moves">Moves: 0</div>
+<button onclick="startGame()">Restart Game</button>
+
+<script>
+const cardsArray = ['A','A','B','B','C','C','D','D','E','E','F','F','G','G','H','H'];
+let board = [];
+let firstCard = null;
+let secondCard = null;
+let lockBoard = false;
+let moves = 0;
+
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+function startGame() {
+    const gameBoard = document.getElementById('game-board');
+    gameBoard.innerHTML = '';
+    board = shuffle(cardsArray.slice());
+    firstCard = null;
+    secondCard = null;
+    lockBoard = false;
+    moves = 0;
+    document.getElementById('moves').textContent = 'Moves: 0';
+
+    board.forEach((letter, index) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.letter = letter;
+        card.dataset.index = index;
+        card.addEventListener('click', flipCard);
+        gameBoard.appendChild(card);
+    });
+}
+
+function flipCard() {
+    if (lockBoard) return;
+    if (this === firstCard) return;
+
+    this.textContent = this.dataset.letter;
+    this.classList.add('flipped');
+
+    if (!firstCard) {
+        firstCard = this;
+    } else {
+        secondCard = this;
+        moves++;
+        document.getElementById('moves').textContent = 'Moves: ' + moves;
+        checkForMatch();
+    }
+}
+
+function checkForMatch() {
+    if (firstCard.dataset.letter === secondCard.dataset.letter) {
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+        resetCards();
+    } else {
+        lockBoard = true;
+        setTimeout(() => {
+            firstCard.textContent = '';
+            secondCard.textContent = '';
+            firstCard.classList.remove('flipped');
+            secondCard.classList.remove('flipped');
+            resetCards();
+        }, 1000);
+    }
+}
+
+function resetCards() {
+    [firstCard, secondCard, lockBoard] = [null, null, false];
+}
+
+startGame();
+</script>
+
+</body>
+</html>
